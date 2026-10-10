@@ -47,7 +47,7 @@ productRouter.get("/:id", async (req, res) => {
             id,
         ]);
 
-        res.json({ messaeg: "Product retrieved successfully", data });
+        res.json({ message: "Product retrieved successfully", data });
     } catch (err) {
         res.status(404).json({
             message: "Failed to retrieve product",

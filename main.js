@@ -132,6 +132,62 @@ app.get("/add-notNull", async (req, res) => {
     }
 });
 
+// Q-6
+
+app.get("/initialization", async (req, res) => {
+    try {
+        await pool.query(`
+            INSERT INTO
+                suppliers (supplierName, contactNumber)
+            VALUES ('FreshFoods', '01001234567');
+            `);
+
+        const [freshFoodID] = await pool.query(
+            `SELECT id FROM suppliers WHERE supplierName = 'FreshFoods';`,
+        );
+
+        await pool.query(
+            `
+                INSERT INTO
+                products (
+                    productName,
+                    price,
+                    stockQuantity,
+                    supplierID
+                )
+            VALUES ('Milk', 15.00, 50, ?),
+                ("Bread", 20.00, 30, ?),
+                ('Eggs', 20.00, 40, ?)
+                `,
+            [freshFoodID[0].id, freshFoodID[0].id, freshFoodID[0].id],
+        );
+
+        const [milkID] = await pool.query(
+            `select id from products WHERE productName = "Milk"`,
+        );
+
+        await pool.query(
+            `
+            INSERT INTO
+            sales (
+                quantitySold,
+                saleDate,
+                productID
+            )
+        VALUES (2, '2025-05-20', ?)
+            `,
+            [milkID[0].id],
+        );
+
+        res.json({ message: "Initialization created successfully" });
+    } catch (err) {
+        res.status(400).json({
+            message: "Failed to create initialization",
+            error: err.message,
+        });
+    }
+});
+
 // Q-7
 app.get("/update-bread-price", async (req, res) => {
     const { price } = req.body;
@@ -181,7 +237,7 @@ app.get("/total-quantity", async (req, res) => {
         });
     } catch (err) {
         res.status(400).json({
-            messaeg: "Failed to retrieve total quantity sold",
+            message: "Failed to retrieve total quantity sold",
             error: err.message,
         });
     }
@@ -199,7 +255,7 @@ app.get("/highest-stock-quantity", async (req, res) => {
         });
     } catch (err) {
         res.status(400).json({
-            messaeg: "Failed to retrieve highest stock quantity",
+            message: "Failed to retrieve highest stock quantity",
             error: err.message,
         });
     }
@@ -219,7 +275,7 @@ app.get("/suppliers-start-with-f", async (req, res) => {
     } catch (err) {
         res.status(400).json({
             message: "Failed to retrieve suppliers start with 'F'",
-            error: err.messaeg,
+            error: err.message,
         });
     }
 });
@@ -242,7 +298,7 @@ app.get("/products-have-never-sold", async (req, res) => {
     } catch (err) {
         res.status(400).json({
             message: "Failed to retrieve products have never sold",
-            error: err.messaeg,
+            error: err.message,
         });
     }
 });
@@ -263,7 +319,7 @@ app.get("/all-sales", async (req, res) => {
     } catch (err) {
         res.status(400).json({
             message: "Failed to retrieve all sale",
-            error: err.messaeg,
+            error: err.message,
         });
     }
 });
